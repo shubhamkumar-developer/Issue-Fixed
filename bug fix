@@ -1,0 +1,23 @@
+To resolve this bug, all cursor types, not just virtual record cursors, must trigger function.cursorClosed() when they're closed or disposed. Here's a conceptual breakdown of what needs to change:
+
+1. Audit all cursor factories, especially those for:
+
+. GROUP BY
+
+. JOIN
+
+. FILTER
+
+. Aggregation-related cursors
+
+2. Ensure that they trigger cursorClosed() on all functions they use, not just virtual functions.
+
+3. Add this lifecycle call:
+
+java code :
+
+if (function instanceof FunctionWithCursorLifecycle) {
+    ((FunctionWithCursorLifecycle) function).cursorClosed();
+}
+
+at the right cleanup or close stage in each cursor implementation.
